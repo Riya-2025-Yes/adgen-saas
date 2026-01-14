@@ -1,14 +1,66 @@
 'use client';
 
 import { useState } from 'react';
+import Modal from '@/components/modals/modal';
 
 export default function UsersPage() {
-  const [users] = useState([
+  const [users, setUsers] = useState([
     { id: '1', name: 'System Admin', email: 'admin@adgen.local', role: 'SystemAdmin', status: 'active', lastActive: '2 hours ago' },
     { id: '2', name: 'John Marketer', email: 'john@demo.local', role: 'Marketer', status: 'active', lastActive: '5 hours ago' },
     { id: '3', name: 'Jane Viewer', email: 'jane@demo.local', role: 'Viewer', status: 'active', lastActive: '1 day ago' },
     { id: '4', name: 'Bob TenantAdmin', email: 'bob@demo.local', role: 'TenantAdmin', status: 'active', lastActive: '3 hours ago' },
   ]);
+
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    role: 'Viewer'
+  });
+
+  const handleInvite = () => {
+    const newUser = {
+      id: String(users.length + 1),
+      name: formData.name,
+      email: formData.email,
+      role: formData.role,
+      status: 'active',
+      lastActive: 'Just now'
+    };
+    setUsers([...users, newUser]);
+    setShowInviteModal(false);
+    setFormData({ name: '', email: '', role: 'Viewer' });
+    alert('✅ User invited successfully!');
+  };
+
+  const handleEdit = (user: any) => {
+    setSelectedUser(user);
+    setFormData({
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdate = () => {
+    setUsers(users.map(u => 
+      u.id === selectedUser.id 
+        ? { ...u, name: formData.name, email: formData.email, role: formData.role }
+        : u
+    ));
+    setShowEditModal(false);
+    alert('✅ User updated successfully!');
+  };
+
+  const handleRemove = (user: any) => {
+    if (confirm(`Are you sure you want to remove ${user.name}?`)) {
+      setUsers(users.filter(u => u.id !== user.id));
+      alert('✅ User removed successfully!');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -17,7 +69,10 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600 mt-2">Manage users and their roles</p>
         </div>
-        <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-lg hover:shadow-xl transition-all">
+        <button 
+          onClick={() => setShowInviteModal(true)}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-lg hover:shadow-xl transition-all"
+        >
           + Invite User
         </button>
       </div>
@@ -33,11 +88,15 @@ export default function UsersPage() {
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <div className="text-sm font-medium text-gray-600">Admins</div>
-          <div className="text-3xl font-bold text-blue-600 mt-2">2</div>
+          <div className="text-3xl font-bold text-blue-600 mt-2">
+            {users.filter(u => u.role.includes('Admin')).length}
+          </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <div className="text-sm font-medium text-gray-600">Marketers</div>
-          <div className="text-3xl font-bold text-purple-600 mt-2">1</div>
+          <div className="text-3xl font-bold text-purple-600 mt-2">
+            {users.filter(u => u.role === 'Marketer').length}
+          </div>
         </div>
       </div>
 
@@ -87,8 +146,8 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
-                    <button className="text-blue-600 hover:text-blue-800">Edit</button>
-                    <button className="text-red-600 hover:text-red-800">Remove</button>
+                    <button onClick={() => handleEdit(user)} className="text-blue-600 hover:text-blue-800">Edit</button>
+                    <button onClick={() => handleRemove(user)} className="text-red-600 hover:text-red-800">Remove</button>
                   </td>
                 </tr>
               ))}
@@ -96,6 +155,110 @@ export default function UsersPage() {
           </table>
         </div>
       </div>
+
+      {/* Invite Modal */}
+      <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Invite New User">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="John Doe"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="john@example.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
+            <select
+              value={formData.role}
+              onChange={(e) => setFormData({...formData, role: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Viewer">Viewer</option>
+              <option value="Marketer">Marketer</option>
+              <option value="TenantAdmin">Tenant Admin</option>
+              <option value="SystemAdmin">System Admin</option>
+            </select>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={() => setShowInviteModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleInvite}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Send Invitation
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit User">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
+            <select
+              value={formData.role}
+              onChange={(e) => setFormData({...formData, role: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Viewer">Viewer</option>
+              <option value="Marketer">Marketer</option>
+              <option value="TenantAdmin">Tenant Admin</option>
+              <option value="SystemAdmin">System Admin</option>
+            </select>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpdate}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
