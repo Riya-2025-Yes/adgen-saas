@@ -23,6 +23,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     redirect('/login');
   }
 
+  const userRole = session.user?.role || '';
+
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', roles: ['SystemAdmin', 'TenantAdmin', 'Marketer', 'Viewer'] },
     { name: 'Tenants', href: '/system/tenants', roles: ['SystemAdmin'] },
@@ -32,11 +34,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Brand Kits', href: '/admin/brand-kit', roles: ['SystemAdmin', 'TenantAdmin'] },
   ];
 
-  const userNav = navigation.filter(item => item.roles.includes(session.user.role));
+  const userNav = navigation.filter(item => item.roles.includes(userRole));
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -48,8 +49,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">{session.user.name}</span>
-              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{session.user.role}</span>
+              <span className="text-sm text-gray-700">{session.user?.name}</span>
+              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{userRole}</span>
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
                 className="text-sm text-gray-700 hover:text-gray-900"
@@ -62,7 +63,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
         <aside className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)]">
           <nav className="p-4 space-y-1">
             {userNav.map((item) => (
@@ -77,7 +77,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 p-8">
           {children}
         </main>
