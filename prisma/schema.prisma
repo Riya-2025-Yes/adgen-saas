@@ -13,7 +13,13 @@ model User {
   password  String
   name      String
   role      String
+  tenantId  String?
+  status    String   @default("active")
   createdAt DateTime @default(now())
+  
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
+  
+  @@index([email])
 }
 
 model Tenant {
@@ -21,4 +27,6 @@ model Tenant {
   name      String
   slug      String   @unique
   createdAt DateTime @default(now())
+  
+  users     User[]
 }
