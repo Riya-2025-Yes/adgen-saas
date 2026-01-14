@@ -1,6 +1,7 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -41,15 +42,24 @@ export default function DashboardPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          <Link 
+            href="/campaigns/new"
+            className="px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-center"
+          >
             Create New Campaign
-          </button>
-          <button className="px-6 py-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+          </Link>
+          <Link 
+            href="/admin/templates"
+            className="px-6 py-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-center"
+          >
             Browse Templates
-          </button>
-          <button className="px-6 py-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+          </Link>
+          <Link 
+            href="/assets"
+            className="px-6 py-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-center"
+          >
             View Assets
-          </button>
+          </Link>
         </div>
       </div>
 
