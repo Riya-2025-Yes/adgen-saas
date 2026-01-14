@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Modal from '@/components/modals/modal';
 
 export default function TemplatesPage() {
-  const [templates] = useState([
+  const [templates, setTemplates] = useState([
     { 
       id: '1', 
       name: 'Social Media Post', 
@@ -51,6 +52,16 @@ export default function TemplatesPage() {
     },
   ]);
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    type: 'image',
+    category: 'Social',
+    description: ''
+  });
+
   const getTypeColor = (type: string) => {
     switch(type) {
       case 'image': return 'bg-purple-100 text-purple-800';
@@ -60,6 +71,53 @@ export default function TemplatesPage() {
     }
   };
 
+  const handleCreate = () => {
+    const newTemplate = {
+      id: String(templates.length + 1),
+      ...formData,
+      uses: 0,
+      active: true
+    };
+    setTemplates([...templates, newTemplate]);
+    setShowCreateModal(false);
+    setFormData({ name: '', type: 'image', category: 'Social', description: '' });
+    alert('✅ Template created successfully!');
+  };
+
+  const handleEdit = (template: any) => {
+    setSelectedTemplate(template);
+    setFormData({
+      name: template.name,
+      type: template.type,
+      category: template.category,
+      description: template.description
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdate = () => {
+    setTemplates(templates.map(t => 
+      t.id === selectedTemplate.id 
+        ? { ...t, ...formData }
+        : t
+    ));
+    setShowEditModal(false);
+    alert('✅ Template updated successfully!');
+  };
+
+  const handleToggleActive = (template: any) => {
+    setTemplates(templates.map(t => 
+      t.id === template.id 
+        ? { ...t, active: !t.active }
+        : t
+    ));
+    alert(`✅ Template ${!template.active ? 'activated' : 'deactivated'}!`);
+  };
+
+  const handleUseTemplate = (template: any) => {
+    alert(`Using template: ${template.name}\n\nThis would redirect to campaign creation with this template pre-selected.`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -67,7 +125,10 @@ export default function TemplatesPage() {
           <h1 className="text-3xl font-bold text-gray-900">Templates</h1>
           <p className="text-gray-600 mt-2">Manage campaign templates and content structures</p>
         </div>
-        <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 font-semibold shadow-lg hover:shadow-xl transition-all">
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 font-semibold shadow-lg hover:shadow-xl transition-all"
+        >
           + Create Template
         </button>
       </div>
@@ -129,17 +190,166 @@ export default function TemplatesPage() {
               </div>
 
               <div className="flex gap-2">
-                <button className="flex-1 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 text-sm font-semibold">
+                <button 
+                  onClick={() => handleUseTemplate(template)}
+                  className="flex-1 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 text-sm font-semibold"
+                >
                   Use Template
                 </button>
-                <button className="flex-1 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 text-sm font-semibold">
-                  Edit
-                </button>
+                <div className="relative group">
+                  <button className="px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 text-sm font-semibold">
+                    •••
+                  </button>
+                  <div className="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-10">
+                    <button 
+                      onClick={() => handleEdit(template)}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                    >
+                      Edit Template
+                    </button>
+                    <button 
+                      onClick={() => handleToggleActive(template)}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                    >
+                      {template.active ? 'Deactivate' : 'Activate'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Create Modal */}
+      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create New Template">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Template Name *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              placeholder="e.g., Instagram Story Template"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Type *</label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({...formData, type: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+              <option value="text">Text</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="Social">Social</option>
+              <option value="Advertising">Advertising</option>
+              <option value="Email">Email</option>
+              <option value="Content">Content</option>
+              <option value="E-commerce">E-commerce</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              placeholder="Brief description of the template..."
+            />
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreate}
+              className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Create Template
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Template">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Template Name *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Type *</label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({...formData, type: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+              <option value="text">Text</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="Social">Social</option>
+              <option value="Advertising">Advertising</option>
+              <option value="Email">Email</option>
+              <option value="Content">Content</option>
+              <option value="E-commerce">E-commerce</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpdate}
+              className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
