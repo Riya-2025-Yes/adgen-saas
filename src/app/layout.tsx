@@ -1,5 +1,27 @@
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import Providers from '@/components/providers/session-provider';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="en"><body>{children}</body></html>;
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'AdGen SaaS',
+  description: 'Multi-tenant Advertisement Generator',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
+  );
 }
