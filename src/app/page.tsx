@@ -13,7 +13,7 @@ export default function Home() {
         </h1>
         
         <p className="text-xl text-gray-600 mb-8">
-          Multi-tenant Advertisement Generator Platform
+          Enterprise Multi-Tenant Advertisement Generator Platform
         </p>
         
         <div className="flex gap-4 justify-center">
@@ -25,12 +25,23 @@ export default function Home() {
           </Link>
         </div>
         
-        <div className="mt-8 p-6 bg-white rounded-xl shadow-md">
-          <p className="text-sm text-gray-600 font-semibold mb-3">Demo Credentials:</p>
-          <div className="font-mono text-sm space-y-1">
-            <p className="text-gray-800">admin@adgen.local</p>
-            <p className="text-gray-800">Admin123!@#</p>
+        <div className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto">
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="text-2xl font-bold text-blue-600 mb-1">✓</div>
+            <div className="text-sm text-gray-600">Multi-Tenant</div>
           </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="text-2xl font-bold text-blue-600 mb-1">✓</div>
+            <div className="text-sm text-gray-600">White-Label</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="text-2xl font-bold text-blue-600 mb-1">✓</div>
+            <div className="text-sm text-gray-600">Enterprise-Grade</div>
+          </div>
+        </div>
+
+        <div className="mt-8 text-sm text-gray-500">
+          © 2025 AdGen SaaS. All rights reserved.
         </div>
       </div>
     </div>

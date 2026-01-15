@@ -7,26 +7,189 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  
+  // White-label branding
+  appShellLogo    String?
+  loginLogo       String?
+  favicon         String?
+  primaryColor    String   @default("#3B82F6")
+  displayName     String?
+  
+  // Custom domain
+  customDomain         String?
+  customDomainStatus   String   @default("pending") // pending, verified, failed
+  customDomainToken    String?
+  
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  users     User[]
+  brandKit  BrandKit?
+  providers Provider[]
+  templates Template[]
+  campaigns Campaign[]
+  auditLogs AuditLog[]
+}
+
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   email     String   @unique
   password  String
   name      String
-  role      String
+  role      String   // SystemAdmin, TenantAdmin, Marketer, Viewer
   tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   status    String   @default("active")
+  
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
-  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
+  campaigns Campaign[]
+  auditLogs AuditLog[]
   
+  @@index([tenantId])
   @@index([email])
 }
 
-model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
+model BrandKit {
+  id          String   @id @default(uuid())
+  tenantId    String   @unique
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
-  users     User[]
+  // Colors
+  primaryColor     String?
+  secondaryColor   String?
+  accentColor      String?
+  backgroundColor  String?
+  textColor        String?
+  
+  // Typography
+  headingFont String?
+  bodyFont    String?
+  
+  // Voice & Tone
+  tone            String?
+  voiceGuidelines String?
+  
+  // Logos (S3 URLs)
+  primaryLogoUrl   String?
+  secondaryLogoUrl String?
+  iconLogoUrl      String?
+  
+  // Guidelines
+  forbiddenWords String[] @default([])
+  brandHashtags  String[] @default([])
+  disclaimers    String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Provider {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  type        String   // llm, image, video
+  name        String   // OpenAI, Claude, DALL-E, etc.
+  
+  // Configuration
+  apiKey      String   // Encrypted
+  apiUrl      String?
+  model       String?
+  config      Json?    // Additional config as JSON
+  
+  status      String   @default("active")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([tenantId])
+  @@index([type])
+}
+
+model Template {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name        String
+  type        String   // text, image, video
+  category    String
+  description String?
+  
+  // Template content
+  content     Json     // Template structure with placeholders
+  version     Int      @default(1)
+  
+  active      Boolean  @default(true)
+  uses        Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  campaigns   Campaign[]
+  
+  @@index([tenantId])
+  @@index([type])
+}
+
+model Campaign {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  templateId  String?
+  template    Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  
+  name        String
+  description String?
+  status      String   @default("draft") // draft, in-progress, completed, failed
+  progress    Int      @default(0)
+  
+  // BullMQ job reference
+  jobId       String?
+  
+  // Results
+  assetsCount Int      @default(0)
+  assetsUrls  String[] @default([]) // S3 URLs
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([tenantId])
+  @@index([userId])
+  @@index([status])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  tenantId    String?
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  action      String   // create, update, delete, login, etc.
+  resource    String   // tenant, user, campaign, etc.
+  resourceId  String?
+  
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([tenantId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }
