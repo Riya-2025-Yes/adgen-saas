@@ -13,34 +13,15 @@ export default function Home() {
         </h1>
         
         <p className="text-xl text-gray-600 mb-8">
-          Enterprise Multi-Tenant Advertisement Generator Platform
+          Enterprise Multi-Tenant Advertisement Generator
         </p>
         
         <Link 
           href="/login"
           className="inline-block px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
         >
-          Sign In to Your Account
+          Sign In
         </Link>
-        
-        <div className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto">
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="text-2xl font-bold text-blue-600 mb-1">✓</div>
-            <div className="text-sm text-gray-600">Multi-Tenant</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="text-2xl font-bold text-blue-600 mb-1">✓</div>
-            <div className="text-sm text-gray-600">White-Label</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="text-2xl font-bold text-blue-600 mb-1">✓</div>
-            <div className="text-sm text-gray-600">Enterprise</div>
-          </div>
-        </div>
-
-        <div className="mt-8 text-sm text-gray-500">
-          © 2025 AdGen SaaS. All rights reserved.
-        </div>
       </div>
     </div>
   );
