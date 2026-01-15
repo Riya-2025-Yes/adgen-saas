@@ -1,31 +1,37 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
 
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+        <div className="text-xl">Loading...</div>
       </div>
     );
   }
 
   if (!session) {
-    redirect('/login');
+    return null;
   }
 
-  const userRole = session.user?.role || '';
-
-  const navigation = [
+  const navItems = [
     { name: 'Dashboard', href: '/dashboard', roles: ['SystemAdmin', 'TenantAdmin', 'Marketer', 'Viewer'] },
     { name: 'Tenants', href: '/system/tenants', roles: ['SystemAdmin'] },
     { name: 'Users', href: '/admin/users', roles: ['SystemAdmin', 'TenantAdmin'] },
@@ -34,42 +40,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Brand Kits', href: '/admin/brand-kit', roles: ['SystemAdmin', 'TenantAdmin'] },
   ];
 
-  const userNav = navigation.filter(item => item.roles.includes(userRole));
+  const userRole = session.user?.role || 'Viewer';
+  const filteredNav = navItems.filter(item => item.roles.includes(userRole));
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-                AG
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                  AG
+                </div>
+                <span className="ml-2 text-xl font-bold text-gray-900">AdGen SaaS</span>
               </div>
-              <span className="ml-3 text-xl font-semibold text-gray-900">AdGen SaaS</span>
             </div>
-
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <span className="text-sm text-gray-700">{session.user?.name}</span>
-              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{userRole}</span>
+              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                {userRole}
+              </span>
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
-                className="text-sm text-gray-700 hover:text-gray-900"
+                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
               >
                 Sign Out
               </button>
             </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       <div className="flex">
-        <aside className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)]">
+        <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
           <nav className="p-4 space-y-1">
-            {userNav.map((item) => (
+            {filteredNav.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
-                className="block px-4 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
               >
                 {item.name}
               </Link>
