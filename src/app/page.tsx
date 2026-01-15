@@ -16,14 +16,12 @@ export default function Home() {
           Enterprise Multi-Tenant Advertisement Generator Platform
         </p>
         
-        <div className="flex gap-4 justify-center">
-          <Link 
-            href="/login"
-            className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
-          >
-            Sign In
-          </Link>
-        </div>
+        <Link 
+          href="/login"
+          className="inline-block px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+        >
+          Sign In to Your Account
+        </Link>
         
         <div className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto">
           <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -36,7 +34,7 @@ export default function Home() {
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <div className="text-2xl font-bold text-blue-600 mb-1">✓</div>
-            <div className="text-sm text-gray-600">Enterprise-Grade</div>
+            <div className="text-sm text-gray-600">Enterprise</div>
           </div>
         </div>
 
